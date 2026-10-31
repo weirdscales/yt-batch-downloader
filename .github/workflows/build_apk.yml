@@ -1,0 +1,26 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build APK with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: stable
+
+      - name: Upload Compiled APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-batch-downloader-apk
+          path: ${{ steps.buildozer.outputs.filename }}
