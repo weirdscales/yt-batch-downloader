@@ -30,7 +30,8 @@ One project, two apps: a **desktop GUI** for Windows, macOS and Linux, and a **m
 |---|---|---|
 | **Runs on** | Windows, macOS, Linux | Android 7.0+ |
 | **Built with** | Python + Tkinter | Python + Kivy (packaged with Buildozer) |
-| **File** | [`desktop/main.py`](desktop/main.py) | [`mobile/main.py`](mobile/main.py) |
+| **Code** | [`desktop/main.py`](desktop/main.py) | [`mobile/main.py`](mobile/main.py) |
+| **Get started** | [Install the requirements and run `main.py`](#quick-start--desktop) | [Download the APK from Releases](#quick-start--android) |
 | **Format picker** | Best / 1080p / 720p / 480p, or Audio Only (MP3) | **Video** (Best / 1080p / 720p / 480p / 360p) or **Audio** (M4A / MP3 / WAV) |
 | **FFmpeg** | Found automatically: your system install, or the bundled `imageio-ffmpeg` package | Not bundled in the APK yet (see [FFmpeg](#what-needs-ffmpeg)) |
 | **Parallel downloads** | 1–6 workers (default 3) | 2 |
@@ -57,23 +58,47 @@ Many downloader apps handle one link at a time and wrap it in ads. This one is b
 
 ## Quick start — Desktop
 
-Works on Windows, macOS, and Linux.
+Works on Windows, macOS, and Linux. You need **Python 3.10 or newer**.
+
+**1. Get the code and open the `desktop` folder**
 
 ```bash
 git clone https://github.com/weirdscales/yt-batch-downloader.git
-cd yt-batch-downloader
-
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
-pip install "yt-dlp[default]" imageio-ffmpeg tkinterdnd2
-python desktop/yt_downloader_desktop.py
+cd yt-batch-downloader/desktop
 ```
 
-- `imageio-ffmpeg` gives the app its own FFmpeg, so HD merging and MP3 conversion work without a separate install. If you already have FFmpeg on your PATH, the app uses that instead.
-- `tkinterdnd2` is optional and only adds drag-and-drop. Everything else works without it.
-- **Linux:** Tkinter ships separately: `sudo apt install python3-tk` (Debian/Ubuntu) or `sudo dnf install python3-tkinter` (Fedora).
-- **Windows / macOS:** If Tkinter is missing, re-run the Python installer and tick *tcl/tk and IDLE*.
+**2. Create a virtual environment (recommended)**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+```
+
+On macOS and Linux, use `python3` if `python` isn't found.
+
+**3. Install the requirements**
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs three packages from [`desktop/requirements.txt`](desktop/requirements.txt):
+
+| Package | What it's for |
+|---|---|
+| `yt-dlp[default]` | The download engine |
+| `imageio-ffmpeg` | A bundled FFmpeg, so HD merging and MP3 conversion work without a separate install. If you already have FFmpeg on your PATH, the app uses that instead. |
+| `tkinterdnd2` | Optional drag-and-drop. If it fails to install, delete that line from `requirements.txt`; the app works without it. |
+
+**4. Run it**
+
+```bash
+python main.py
+```
+
+The Tkinter window opens and you're ready to paste links.
+
+> **Tkinter missing?** It ships with Python on Windows and macOS (if it's missing, re-run the Python installer and tick *tcl/tk and IDLE*). On Linux install it separately: `sudo apt install python3-tk` (Debian/Ubuntu) or `sudo dnf install python3-tkinter` (Fedora).
 
 ### Using the desktop app
 
@@ -93,13 +118,15 @@ If something stops working, click **↻ Update yt-dlp & FFmpeg Engine** first. Y
 
 ## Quick start — Android
 
-### Install a prebuilt APK
+### Just want to use the app? Download the APK
 
-1. Download the latest `.apk` from the [Releases](../../releases) page.
+The APK on the Releases page is already built and works. You don't need to build anything.
+
+1. Go to the [**Releases**](../../releases) page and download the latest `.apk`.
 2. Open it on your phone and allow *Install unknown apps* if asked.
 3. Grant the storage/media permission when the app asks.
 
-> **Heads-up:** Google Play Protect may offer to scan the app because it isn't distributed through the Play Store. That's normal for any sideloaded app. The full source is in this repo, so you can also build it yourself.
+> **Heads-up:** Google Play Protect may offer to scan the app because it isn't distributed through the Play Store. That's normal for any sideloaded app. The full source is in this repo, so you can also build it yourself (see below).
 
 ### Using the mobile app
 
@@ -111,34 +138,84 @@ If something stops working, click **↻ Update yt-dlp & FFmpeg Engine** first. Y
 
 If something stops working, tap **↻ Update Engine**. If every client hits a 403, the app also tries this once on its own.
 
-### Build it yourself
+### Want to modify the app or build your own APK?
 
-Build environment: Ubuntu 24.04 (or Windows with WSL2), Buildozer, python-for-android.
+**You only need this section if you want to change [`mobile/main.py`](mobile/main.py) (or the build settings) and make your own APK.** Otherwise, use the Releases APK above.
+
+Android apps are built with [Buildozer](https://github.com/kivy/buildozer), which needs Linux. On Windows, use **WSL2 with Ubuntu** (24.04 works) and keep the project in your Linux home folder (for example `~/yt-batch-downloader`), not under `/mnt/c`, which is much slower.
+
+> **Tip: try changes on your computer first.** The mobile app also runs on desktop: inside `mobile/`, run `pip install kivy yt-dlp certifi` and then `python main.py`. That's much faster than rebuilding the APK. Android-only parts (permissions, the MediaStore export) only run on a phone.
+
+**1. Install the system packages (once)**
 
 ```bash
 sudo apt update
 sudo apt install -y git zip unzip openjdk-17-jdk python3-pip python3-venv \
   autoconf automake libtool pkg-config zlib1g-dev libncurses-dev \
   libffi-dev libssl-dev build-essential cmake ccache
+```
 
-python3 -m venv .venv && source .venv/bin/activate
+**2. Set up the build environment (once)**
+
+```bash
+git clone https://github.com/weirdscales/yt-batch-downloader.git ~/yt-batch-downloader   # skip if you already have it
+cd ~/yt-batch-downloader
+
+python3 -m venv .venv                # keep this outside mobile/ so Buildozer never treats it as app source
+source .venv/bin/activate
 pip install --upgrade buildozer "cython==0.29.36" setuptools
-
-cd mobile
-buildozer -v android debug          # APK ends up in mobile/bin/
 ```
 
-Recommended `mobile/buildozer.spec` settings:
+**3. Build the APK**
 
-```ini
-requirements = python3,kivy==2.3.0,yt-dlp,certifi
-android.archs = arm64-v8a
-android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,READ_MEDIA_VIDEO,READ_MEDIA_AUDIO
+```bash
+cd ~/yt-batch-downloader/mobile
+buildozer -v android debug 2>&1 | tee build.log
 ```
 
-The mobile app only uses Kivy, yt-dlp and certifi, so a short `requirements` line builds faster and breaks less. Pin `p4a.branch` to a release tag instead of `master` for reproducible builds.
+The first build downloads the Android SDK and NDK (several GB) and compiles everything, so it can take a long time. Later builds are much faster. When it finishes, your APK is in `mobile/bin/`.
 
-> The mobile app lives in its own folder because Buildozer packages everything next to `buildozer.spec`, and it requires the entry file to be named `main.py`.
+**4. Rebuilding after changes (or when a build misbehaves)**
+
+For a normal code change, just run step 3 again. If you changed `buildozer.spec` (requirements, python-for-android branch, architectures) or a build fails in strange ways, wipe the cached build state first:
+
+```bash
+source ~/yt-batch-downloader/.venv/bin/activate     # if it isn't already active
+cd ~/yt-batch-downloader/mobile
+
+buildozer android clean
+rm -rf .buildozer/android/platform/python-for-android
+rm -rf .buildozer/android/platform/build-*
+
+pip install --upgrade buildozer "cython==0.29.36" setuptools
+buildozer -v android debug 2>&1 | tee build.log
+```
+
+What those lines do:
+
+| Command | Why |
+|---|---|
+| `buildozer android clean` | Removes the previous build's output |
+| `rm -rf .buildozer/android/platform/python-for-android` | Forces a fresh python-for-android checkout (needed after changing `p4a.branch`) |
+| `rm -rf .buildozer/android/platform/build-*` | Forces every Python package to be rebuilt from scratch |
+| `pip install --upgrade ...` | Makes sure the build tools are current |
+| `... \| tee build.log` | Saves the full log so you can search it if something fails |
+
+`mobile/buildozer.spec` is already configured for this app. If you add Python libraries, list them under `requirements` in that file.
+
+**5. If the build fails**
+
+The last lines of the output only say `Command failed`. The real error is higher up. Search the log for it:
+
+```bash
+grep -n -iE "error|traceback" build.log | head -30
+```
+
+Open an issue and paste the lines around the first real error.
+
+**6. Install your APK on a phone**
+
+Copy `mobile/bin/*.apk` to your phone and open it. On WSL2 you can copy it to Windows first, for example `cp bin/*.apk /mnt/c/Users/<your-name>/Downloads/`. Or install over USB with `adb install -r yourapp-debug.apk`. Play Protect may ask to scan every new build, because each build is a new APK to it.
 
 ---
 
@@ -182,13 +259,16 @@ Merging separate HD video and audio streams, and converting to MP3 or WAV, both 
 ```text
 yt-batch-downloader/
 ├── desktop/
-│   └── yt_downloader_desktop.py   # Tkinter app (Windows / macOS / Linux)
+│   ├── main.py                # Tkinter app (Windows / macOS / Linux)
+│   └── requirements.txt       # pip install -r requirements.txt
 ├── mobile/
-│   ├── main.py                    # Kivy app (Android), entry file name required by Buildozer
+│   ├── main.py                # Kivy app (Android); Buildozer requires this file name
 │   └── buildozer.spec
 ├── README.md
 └── LICENSE
 ```
+
+The two apps live in separate folders so Buildozer only packages the mobile code into the APK.
 
 ---
 
@@ -264,6 +344,6 @@ This project is a front end for yt-dlp and is **not affiliated with or endorsed 
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE). Copyright © 2026 weirdscales.
 
 If this saved you time, a ⭐ on the repo helps others find it.
