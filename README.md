@@ -30,7 +30,7 @@ One project, two apps: a **desktop GUI** for Windows, macOS and Linux, and a **m
 |---|---|---|
 | **Runs on** | Windows, macOS, Linux | Android 7.0+ |
 | **Built with** | Python + Tkinter | Python + Kivy (packaged with Buildozer) |
-| **File** | [`desktop/yt_downloader_desktop.py`](desktop/yt_downloader_desktop.py) | [`mobile/main.py`](mobile/main.py) |
+| **File** | [`desktop/main.py`](desktop/main.py) | [`mobile/main.py`](mobile/main.py) |
 | **Format picker** | Best / 1080p / 720p / 480p, or Audio Only (MP3) | **Video** (Best / 1080p / 720p / 480p / 360p) or **Audio** (M4A / MP3 / WAV) |
 | **FFmpeg** | Found automatically: your system install, or the bundled `imageio-ffmpeg` package | Not bundled in the APK yet (see [FFmpeg](#what-needs-ffmpeg)) |
 | **Parallel downloads** | 1–6 workers (default 3) | 2 |
@@ -60,11 +60,11 @@ Many downloader apps handle one link at a time and wrap it in ads. This one is b
 Works on Windows, macOS, and Linux.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/yt-batch-downloader.git
+git clone https://github.com/weirdscales/yt-batch-downloader.git
 cd yt-batch-downloader
 
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 
 pip install "yt-dlp[default]" imageio-ffmpeg tkinterdnd2
 python desktop/yt_downloader_desktop.py
